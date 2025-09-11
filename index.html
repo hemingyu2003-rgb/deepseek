@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeepSeek AI 助手</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="light-theme">
+    <div class="container">
+        <!-- 顶部导航栏 -->
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-robot"></i>
+                <h1>DeepSeek AI 助手</h1>
+            </div>
+            <div class="header-controls">
+                <button id="themeToggle" class="icon-button" title="切换主题">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button id="userMenuButton" class="icon-button" title="用户菜单">
+                    <i class="fas fa-user-circle"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- 侧边栏 -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>对话历史</h2>
+                <button id="newChatBtn" class="new-chat-btn">
+                    <i class="fas fa-plus"></i> 新对话
+                </button>
+            </div>
+            <div class="chat-history" id="chatHistory">
+                <!-- 对话历史将动态添加在这里 -->
+            </div>
+        </aside>
+
+        <!-- 主聊天区域 -->
+        <main class="main-content">
+            <div class="chat-container" id="chatContainer">
+                <!-- 欢迎消息 -->
+                <div class="welcome-message">
+                    <i class="fas fa-robot"></i>
+                    <h2>您好！我是您的AI助手</h2>
+                    <p>请问有什么可以帮助您的吗？</p>
+                </div>
+                <!-- 对话历史将动态添加在这里 -->
+            </div>
+            <div class="input-area">
+                <div class="input-container">
+                    <div class="file-upload-container">
+                        <button id="fileUploadBtn" class="file-upload-btn" title="上传文件">
+                            <i class="fas fa-paperclip"></i>
+                        </button>
+                        <input type="file" id="fileInput" multiple accept="image/*,.pdf,.doc,.docx,.txt">
+                        <div id="filePreview" class="file-preview"></div>
+                    </div>
+                    <textarea id="userInput" placeholder="请输入你的问题..." rows="1"></textarea>
+                    <button id="sendButton" class="send-button">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+                <div class="input-footer">
+                    <span class="hint">Shift + Enter 换行，Enter 发送</span>
+                    <span class="model-indicator" id="modelIndicator">模型: DeepSeek V2</span>
+                </div>
+            </div>
+        </main>
+
+        <!-- 用户菜单 -->
+        <div class="user-menu" id="userMenu">
+            <div class="user-info">
+                <i class="fas fa-user-circle"></i>
+                <span id="usernameDisplay">未登录</span>
+            </div>
+            <hr>
+            <button id="profileBtn" class="menu-item">
+                <i class="fas fa-user-cog"></i> 个人资料
+            </button>
+            <button id="settingsBtn" class="menu-item">
+                <i class="fas fa-cog"></i> 设置
+            </button>
+            <hr>
+            <button id="loginBtn" class="menu-item">
+                <i class="fas fa-sign-in-alt"></i> 登录/注册
+            </button>
+            <button id="logoutBtn" class="menu-item" style="display: none;">
+                <i class="fas fa-sign-out-alt"></i> 退出登录
+            </button>
+        </div>
+    </div>
+
+    <!-- 登录/注册模态框 -->
+    <div class="modal" id="authModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">登录</h2>
+                <button class="close-button" id="closeModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="tabs">
+                    <button class="tab active" data-tab="login">登录</button>
+                    <button class="tab" data-tab="register">注册</button>
+                </div>
+                <form id="loginForm" class="auth-form active">
+                    <div class="form-group">
+                        <label for="loginEmail">邮箱</label>
+                        <input type="email" id="loginEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">密码</label>
+                        <input type="password" id="loginPassword" required>
+                    </div>
+                    <button type="submit" class="auth-button">登录</button>
+                </form>
+                <form id="registerForm" class="auth-form">
+                    <div class="form-group">
+                        <label for="registerName">用户名</label>
+                        <input type="text" id="registerName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerEmail">邮箱</label>
+                        <input type="email" id="registerEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerPassword">密码</label>
+                        <input type="password" id="registerPassword" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">确认密码</label>
+                        <input type="password" id="confirmPassword" required>
+                    </div>
+                    <button type="submit" class="auth-button">注册</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 个人资料模态框 -->
+    <div class="modal" id="profileModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>个人资料</h2>
+                <button class="close-button" id="closeProfileModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="avatar-upload">
+                    <div class="avatar-preview">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <button type="button" class="upload-button" id="uploadAvatar">更换头像</button>
+                </div>
+                <form id="profileForm">
+                    <div class="form-group">
+                        <label for="profileName">用户名</label>
+                        <input type="text" id="profileName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="profileEmail">邮箱</label>
+                        <input type="email" id="profileEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="profileBio">个人简介</label>
+                        <textarea id="profileBio" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="auth-button">保存更改</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 设置模态框 -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>设置</h2>
+                <button class="close-button" id="closeSettingsModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="settingsForm">
+                    <div class="settings-group">
+                        <h3><i class="fas fa-brain"></i> 模型设置</h3>
+                        <div class="form-group">
+                            <label for="modelSelect">选择AI模型:</label>
+                            <select id="modelSelect">
+                                <option value="deepseek-v1">DeepSeek V1</option>
+                                <option value="deepseek-v2" selected>DeepSeek V2</option>
+                                <option value="deepseek-v3">DeepSeek V3</option>
+                                <option value="gpt-4">GPT-4</option>
+                                <option value="claude-2">Claude 2</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="temperature">创造性 (温度):</label>
+                            <div class="slider-container">
+                                <input type="range" id="temperature" min="0" max="100" value="70">
+                                <span id="temperatureValue">70%</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="maxTokens">最大生成长度:</label>
+                            <div class="slider-container">
+                                <input type="range" id="maxTokens" min="100" max="4000" step="100" value="2000">
+                                <span id="maxTokensValue">2000 tokens</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <h3><i class="fas fa-paint-brush"></i> 界面设置</h3>
+                        <div class="form-group">
+                            <label for="fontSize">字体大小:</label>
+                            <select id="fontSize">
+                                <option value="small">小</option>
+                                <option value="medium" selected>中</option>
+                                <option value="large">大</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="enterBehavior">Enter 键行为:</label>
+                            <select id="enterBehavior">
+                                <option value="send" selected>发送消息</option>
+                                <option value="newline">换行</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="autoExpand">自动扩展输入框:</label>
+                            <input type="checkbox" id="autoExpand" checked>
+                        </div>
+                        <div class="form-group">
+                            <label for="sidebarCollapse">侧边栏自动折叠:</label>
+                            <input type="checkbox" id="sidebarCollapse">
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <h3><i class="fas fa-comments"></i> 聊天设置</h3>
+                        <div class="form-group">
+                            <label for="apiEndpoint">API 端点:</label>
+                            <input type="text" id="apiEndpoint" placeholder="例如: http://localhost:3001/api/chat">
+                        </div>
+                        <div class="form-group">
+                            <label for="autoSave">自动保存对话:</label>
+                            <input type="checkbox" id="autoSave" checked>
+                        </div>
+                        <div class="form-group">
+                            <label for="messageHistory">显示消息时间:</label>
+                            <input type="checkbox" id="messageHistory" checked>
+                        </div>
+                        <div class="form-group">
+                            <label for="typingAnimation">显示打字动画:</label>
+                            <input type="checkbox" id="typingAnimation" checked>
+                        </div>
+                        <div class="form-group">
+                            <label for="messageSound">消息提示音:</label>
+                            <input type="checkbox" id="messageSound">
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <h3><i class="fas fa-file-upload"></i> 文件上传设置</h3>
+                        <div class="form-group">
+                            <label for="maxFileSize">最大文件大小 (MB):</label>
+                            <input type="number" id="maxFileSize" min="1" max="50" value="10">
+                        </div>
+                        <div class="form-group">
+                            <label for="allowedFileTypes">允许的文件类型:</label>
+                            <select id="allowedFileTypes" multiple>
+                                <option value="image/*" selected>图片</option>
+                                <option value=".pdf" selected>PDF文档</option>
+                                <option value=".doc,.docx" selected>Word文档</option>
+                                <option value=".txt" selected>文本文件</option>
+                            </select>
+                            <div class="form-hint">按住Ctrl可选择多个类型</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="autoCompressImages">自动压缩图片:</label>
+                            <input type="checkbox" id="autoCompressImages" checked>
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <h3><i class="fas fa-shield-alt"></i> 隐私设置</h3>
+                        <div class="form-group">
+                            <label for="dataCollection">允许匿名数据收集:</label>
+                            <input type="checkbox" id="dataCollection">
+                        </div>
+                        <div class="form-group">
+                            <label for="clearHistory">自动清除历史记录:</label>
+                            <select id="clearHistory">
+                                <option value="never">从不</option>
+                                <option value="day">1天后</option>
+                                <option value="week">1周后</option>
+                                <option value="month">1月后</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <button type="button" id="exportData" class="auth-button secondary">导出数据</button>
+                            <button type="button" id="importData" class="auth-button secondary">导入数据</button>
+                        </div>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" id="resetSettings" class="cancel-button">恢复默认</button>
+                        <button type="submit" class="auth-button">保存设置</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 删除确认模态框 -->
+    <div class="modal" id="deleteConfirmModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>确认删除</h2>
+                <button class="close-button" id="closeDeleteModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>您确定要删除这个对话吗？此操作无法撤销。</p>
+                <div class="modal-actions">
+                    <button id="cancelDelete" class="cancel-button">取消</button>
+                    <button id="confirmDelete" class="danger-button">删除</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 文件预览模态框 -->
+    <div class="modal" id="filePreviewModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="filePreviewTitle">文件预览</h2>
+                <button class="close-button" id="closeFilePreviewModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="filePreviewContent"></div>
+                <div class="modal-actions">
+                    <button id="downloadFile" class="auth-button">下载文件</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 通知容器 -->
+    <div id="notificationContainer" class="notification-container"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
