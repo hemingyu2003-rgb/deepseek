@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
         selectedModel: 'deepseek-v2',
         temperature: 70,
         maxTokens: 2000,
-        apiEndpoint: 'http://43.138.229.108:3001/api/chat',
+        apiEndpoint: 'http://localhost:3001/api/chat',
         autoSave: true,
         messageHistory: true,
         fontSize: 'medium',
@@ -1405,6 +1405,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return responses[index];
     }
 });
+
 
 
 
